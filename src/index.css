@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Core dark surfaces */
+  --color-bg: #0a0b0f;
+  --color-surface: #14161d;
+  --color-surface-raised: #1b1e27;
+  --color-surface-hover: #22252f;
+  --color-border: #262a35;
+  --color-border-strong: #333844;
+
+  /* Text */
+  --color-text: #f4f5f7;
+  --color-text-muted: #9498a3;
+  --color-text-faint: #62666f;
+
+  /* Brand accent - energetic orange */
+  --color-accent: #ff5a1f;
+  --color-accent-hover: #ff7240;
+  --color-accent-muted: #7a341a;
+  --color-accent-soft: #2b1810;
+
+  /* Semantic */
+  --color-success: #34d399;
+  --color-success-soft: #0f2a22;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --color-danger-soft: #2c1517;
+
+  /* Muscle-group accents used sparingly for day badges */
+  --color-push: #ff5a1f;
+  --color-pull: #3ba7ff;
+  --color-legs: #a78bfa;
+
+  --animate-fade-in: fade-in 0.25s ease-out;
+  --animate-slide-up: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-scale-in: scale-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-pulse-ring: pulse-ring 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgb(255 90 31 / 0.35); }
+    100% { box-shadow: 0 0 0 10px rgb(255 90 31 / 0); }
+  }
+}
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    overscroll-behavior-y: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Hide number input spinners so weight/rep fields look clean */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong);
+    border-radius: 999px;
+  }
+}
+
+@layer utilities {
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
