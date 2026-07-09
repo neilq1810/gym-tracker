@@ -40,7 +40,7 @@ function App() {
   if (!loaded) return <SplashScreen />
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <div className="min-h-screen bg-bg">
         <SideNav />
         <div className="sm:pl-60">
