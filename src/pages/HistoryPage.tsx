@@ -4,7 +4,6 @@ import { WorkoutHistoryCard } from '@/components/history/WorkoutHistoryCard'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { HistoryIcon } from '@/components/ui/Icons'
 import { useAppStore } from '@/store/useAppStore'
-import { getDayProgram } from '@/data/schedule'
 import type { MuscleCategory } from '@/types'
 
 const FILTERS: { key: MuscleCategory | 'all'; label: string }[] = [
@@ -29,7 +28,7 @@ export function HistoryPage() {
 
   const filtered = useMemo(() => {
     if (filter === 'all') return completed
-    return completed.filter((s) => getDayProgram(s.day).category === filter)
+    return completed.filter((s) => s.category === filter)
   }, [completed, filter])
 
   return (
