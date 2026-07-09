@@ -3,9 +3,9 @@ import type {
   AppSettings,
   BodyweightEntry,
   DataBackup,
-  DayProgram,
   ProgressPhoto,
   SetEntry,
+  SplitProgram,
   WorkoutSession,
 } from '@/types'
 import { repository, DEFAULT_SETTINGS } from '@/lib/repository'
@@ -14,7 +14,7 @@ import {
   copyPreviousIntoLog,
   createEmptySet,
   createSessionFromPrevious,
-  createSessionFromProgram,
+  createSessionFromSplit,
 } from '@/lib/sessionFactory'
 import { findPreviousLog } from '@/lib/calculations'
 import { todayIso } from '@/utils/format'
@@ -30,7 +30,7 @@ interface AppState {
   init: () => Promise<void>
 
   // Workout lifecycle
-  startWorkout: (program: DayProgram) => void
+  startWorkout: (split: SplitProgram) => void
   duplicateWorkout: (previous: WorkoutSession) => void
   resumeActiveSession: () => void
   finishActiveSession: (notes?: string) => Promise<void>
@@ -96,14 +96,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ sessions, settings, bodyweightLogs, progressPhotos, activeSession, loaded: true })
   },
 
-  startWorkout: (program) => {
-    const session = createSessionFromProgram(program, todayIso())
+  startWorkout: (split) => {
+    const session = createSessionFromSplit(split, todayIso())
     set((state) => ({ activeSession: session, sessions: upsertLocal(state.sessions, session) }))
     persistSession(session)
   },
 
   duplicateWorkout: (previous) => {
-    const session = createSessionFromPrevious(previous, previous.day, todayIso())
+    const session = createSessionFromPrevious(previous, todayIso())
     set((state) => ({ activeSession: session, sessions: upsertLocal(state.sessions, session) }))
     persistSession(session)
   },

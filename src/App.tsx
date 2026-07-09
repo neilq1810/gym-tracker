@@ -17,6 +17,9 @@ const ExerciseDetailPage = lazy(() =>
 const AnalyticsPage = lazy(() =>
   import('@/pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })),
 )
+const SplitDetailPage = lazy(() =>
+  import('@/pages/SplitDetailPage').then((m) => ({ default: m.SplitDetailPage })),
+)
 
 function SplashScreen() {
   return (
@@ -51,6 +54,7 @@ function App() {
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/history/:id" element={<WorkoutDetailPage />} />
               <Route path="/exercise/:id" element={<ExerciseDetailPage />} />
+              <Route path="/split/:id" element={<SplitDetailPage />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />

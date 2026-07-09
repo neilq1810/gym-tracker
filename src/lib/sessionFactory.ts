@@ -1,7 +1,6 @@
 import type {
-  DayProgram,
   SetEntry,
-  WorkoutDay,
+  SplitProgram,
   WorkoutExerciseLog,
   WorkoutSession,
 } from '@/types'
@@ -37,21 +36,19 @@ function createLogFromProgramExercise(
   }
 }
 
-/** Builds a fresh in-progress session from today's scheduled program. */
-export function createSessionFromProgram(program: DayProgram, date: string): WorkoutSession {
-  if (!program.workoutName) {
-    throw new Error('Cannot start a workout on a rest day')
-  }
+/** Builds a fresh in-progress session for the given split, on the given date. */
+export function createSessionFromSplit(split: SplitProgram, date: string): WorkoutSession {
   return {
     id: generateId(),
-    day: program.day,
-    workoutName: program.workoutName,
+    splitId: split.id,
+    workoutName: split.name,
+    category: split.category,
     date,
     startedAt: Date.now(),
     finishedAt: null,
     status: 'in-progress',
     notes: '',
-    exercises: program.exercises.map((ex, i) =>
+    exercises: split.exercises.map((ex, i) =>
       createLogFromProgramExercise(ex.exerciseId, i, ex.targetSets, ex.repRangeMin, ex.repRangeMax),
     ),
   }
@@ -62,15 +59,12 @@ export function createSessionFromProgram(program: DayProgram, date: string): Wor
  * previous session (used by "Duplicate previous workout"). Weights/reps
  * are carried over as a starting point; completion state is reset.
  */
-export function createSessionFromPrevious(
-  previous: WorkoutSession,
-  day: WorkoutDay,
-  date: string,
-): WorkoutSession {
+export function createSessionFromPrevious(previous: WorkoutSession, date: string): WorkoutSession {
   return {
     id: generateId(),
-    day,
+    splitId: previous.splitId,
     workoutName: previous.workoutName,
+    category: previous.category,
     date,
     startedAt: Date.now(),
     finishedAt: null,

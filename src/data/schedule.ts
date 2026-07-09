@@ -1,10 +1,10 @@
-import type { DayProgram, WorkoutDay } from '@/types'
+import type { SplitId, SplitProgram, WorkoutDay } from '@/types'
 
-/** Push/Pull/Legs weekly schedule. Sunday is a rest day. */
-export const WEEKLY_SCHEDULE: DayProgram[] = [
+/** The 6 fixed PPL splits. Each is a standalone routine — pick any of them on any day. */
+export const SPLITS: SplitProgram[] = [
   {
-    day: 'monday',
-    workoutName: 'Push A',
+    id: 'push-a',
+    name: 'Push A',
     category: 'push',
     exercises: [
       { exerciseId: 'barbell-bench-press', targetSets: 4, repRangeMin: 4, repRangeMax: 6 },
@@ -16,8 +16,8 @@ export const WEEKLY_SCHEDULE: DayProgram[] = [
     ],
   },
   {
-    day: 'tuesday',
-    workoutName: 'Pull A',
+    id: 'pull-a',
+    name: 'Pull A',
     category: 'pull',
     exercises: [
       { exerciseId: 'conventional-deadlift', targetSets: 3, repRangeMin: 3, repRangeMax: 5 },
@@ -29,8 +29,8 @@ export const WEEKLY_SCHEDULE: DayProgram[] = [
     ],
   },
   {
-    day: 'wednesday',
-    workoutName: 'Legs A',
+    id: 'legs-a',
+    name: 'Legs A',
     category: 'legs',
     exercises: [
       { exerciseId: 'back-squat', targetSets: 4, repRangeMin: 4, repRangeMax: 6 },
@@ -42,8 +42,8 @@ export const WEEKLY_SCHEDULE: DayProgram[] = [
     ],
   },
   {
-    day: 'thursday',
-    workoutName: 'Push B',
+    id: 'push-b',
+    name: 'Push B',
     category: 'push',
     exercises: [
       { exerciseId: 'incline-barbell-bench-press', targetSets: 4, repRangeMin: 6, repRangeMax: 8 },
@@ -55,8 +55,8 @@ export const WEEKLY_SCHEDULE: DayProgram[] = [
     ],
   },
   {
-    day: 'friday',
-    workoutName: 'Pull B',
+    id: 'pull-b',
+    name: 'Pull B',
     category: 'pull',
     exercises: [
       { exerciseId: 'barbell-row', targetSets: 4, repRangeMin: 6, repRangeMax: 8 },
@@ -68,8 +68,8 @@ export const WEEKLY_SCHEDULE: DayProgram[] = [
     ],
   },
   {
-    day: 'saturday',
-    workoutName: 'Legs B',
+    id: 'legs-b',
+    name: 'Legs B',
     category: 'legs',
     exercises: [
       { exerciseId: 'hack-squat', targetSets: 3, repRangeMin: 6, repRangeMax: 8 },
@@ -80,20 +80,33 @@ export const WEEKLY_SCHEDULE: DayProgram[] = [
       { exerciseId: 'cable-crunch', targetSets: 3, repRangeMin: 12, repRangeMax: 15 },
     ],
   },
-  {
-    day: 'sunday',
-    workoutName: null,
-    category: 'rest',
-    exercises: [],
-  },
 ]
 
-const scheduleIndex = new Map(WEEKLY_SCHEDULE.map((d) => [d.day, d]))
+const splitIndex = new Map(SPLITS.map((s) => [s.id, s]))
 
-export function getDayProgram(day: WorkoutDay): DayProgram {
-  const program = scheduleIndex.get(day)
-  if (!program) throw new Error(`No program found for day: ${day}`)
-  return program
+export function getSplitById(id: SplitId): SplitProgram {
+  const split = splitIndex.get(id)
+  if (!split) throw new Error(`No split found with id: ${id}`)
+  return split
+}
+
+/**
+ * The suggested Mon-Sat rotation, shown as the default on the dashboard.
+ * Purely a starting point — any split can be logged on any day.
+ */
+export const DEFAULT_SCHEDULE: Record<WorkoutDay, SplitId | null> = {
+  monday: 'push-a',
+  tuesday: 'pull-a',
+  wednesday: 'legs-a',
+  thursday: 'push-b',
+  friday: 'pull-b',
+  saturday: 'legs-b',
+  sunday: null,
+}
+
+export function getSuggestedSplit(day: WorkoutDay): SplitProgram | null {
+  const splitId = DEFAULT_SCHEDULE[day]
+  return splitId ? getSplitById(splitId) : null
 }
 
 const DAY_ORDER: WorkoutDay[] = [
@@ -110,8 +123,8 @@ export function jsDayIndexToWorkoutDay(jsDay: number): WorkoutDay {
   return DAY_ORDER[jsDay]
 }
 
-export function getTodayProgram(date: Date = new Date()): DayProgram {
-  return getDayProgram(jsDayIndexToWorkoutDay(date.getDay()))
+export function getTodaysSuggestedSplit(date: Date = new Date()): SplitProgram | null {
+  return getSuggestedSplit(jsDayIndexToWorkoutDay(date.getDay()))
 }
 
 export const DAY_LABELS: Record<WorkoutDay, string> = {

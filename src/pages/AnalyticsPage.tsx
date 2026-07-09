@@ -2,12 +2,14 @@ import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { Card } from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
 import { VolumeBarChart } from '@/components/analytics/VolumeBarChart'
 import { ExerciseSearch } from '@/components/analytics/ExerciseSearch'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { FlameIcon, BarChartIcon, TrophyIcon, DumbbellIcon } from '@/components/ui/Icons'
+import { FlameIcon, BarChartIcon, TrophyIcon, DumbbellIcon, ChevronRightIcon } from '@/components/ui/Icons'
 import { useAppStore } from '@/store/useAppStore'
 import { getExerciseById } from '@/data/exercises'
+import { SPLITS } from '@/data/schedule'
 import {
   currentStreak,
   monthlyVolume,
@@ -17,7 +19,15 @@ import {
   weeklyVolume,
 } from '@/lib/analytics'
 import { computePersonalRecord } from '@/lib/calculations'
-import { formatVolume, formatWeight } from '@/utils/format'
+import { formatDate, formatVolume, formatWeight } from '@/utils/format'
+import type { MuscleCategory } from '@/types'
+
+const CATEGORY_TONE: Record<MuscleCategory, 'push' | 'pull' | 'legs' | 'neutral'> = {
+  push: 'push',
+  pull: 'pull',
+  legs: 'legs',
+  rest: 'neutral',
+}
 
 export function AnalyticsPage() {
   const navigate = useNavigate()
@@ -36,6 +46,19 @@ export function AnalyticsPage() {
   )
 
   const weeklySeries = useMemo(() => volumeByWeek(sessions, 8), [sessions])
+
+  const splitStats = useMemo(
+    () =>
+      SPLITS.map((split) => {
+        const splitSessions = sessions.filter((s) => s.status === 'completed' && s.splitId === split.id)
+        const lastDate = splitSessions.reduce<string | null>(
+          (latest, s) => (!latest || s.date > latest ? s.date : latest),
+          null,
+        )
+        return { split, count: splitSessions.length, lastDate }
+      }),
+    [sessions],
+  )
 
   const prList = useMemo(() => {
     const exerciseIds = new Set<string>()
@@ -93,6 +116,33 @@ export function AnalyticsPage() {
           description="Complete a few workouts to unlock trends."
         />
       )}
+
+      <div>
+        <p className="mb-2 text-xs font-semibold text-text-faint">PROGRESS BY SPLIT</p>
+        <div className="flex flex-col overflow-hidden rounded-2xl border border-border">
+          {splitStats.map(({ split, count, lastDate }, i) => (
+            <button
+              key={split.id}
+              onClick={() => navigate(`/split/${split.id}`)}
+              className={`flex items-center justify-between gap-2 px-4 py-3 text-left hover:bg-surface-raised ${
+                i !== 0 ? 'border-t border-border' : ''
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Badge tone={CATEGORY_TONE[split.category]}>{split.category.toUpperCase()}</Badge>
+                <span className="text-sm font-medium text-text">{split.name}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-text-faint">
+                <span>
+                  {count} {count === 1 ? 'session' : 'sessions'}
+                  {lastDate && ` · last ${formatDate(lastDate)}`}
+                </span>
+                <ChevronRightIcon className="h-4 w-4" />
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
 
       {prList.length > 0 && (
         <div>

@@ -8,7 +8,6 @@ import { EditableExerciseBlock } from '@/components/history/EditableExerciseBloc
 import { ArrowLeftIcon, CopyIcon, EditIcon, TrashIcon, CheckIcon } from '@/components/ui/Icons'
 import { useAppStore } from '@/store/useAppStore'
 import { computePersonalRecord, sessionVolume } from '@/lib/calculations'
-import { getDayProgram } from '@/data/schedule'
 import { formatDateLong, formatDuration, formatVolume } from '@/utils/format'
 import type { MuscleCategory, WorkoutExerciseLog, WorkoutSession } from '@/types'
 
@@ -55,7 +54,7 @@ export function WorkoutDetailPage() {
     )
   }
 
-  const category = getDayProgram(session.day).category
+  const category = session.category
   const duration = session.finishedAt ? session.finishedAt - session.startedAt : 0
 
   function updateLog(updated: WorkoutExerciseLog) {
@@ -115,7 +114,12 @@ export function WorkoutDetailPage() {
       </div>
 
       <div>
-        <h1 className="font-display text-2xl font-bold text-text">{session.workoutName}</h1>
+        <button
+          onClick={() => navigate(`/split/${session.splitId}`)}
+          className="font-display text-2xl font-bold text-text underline decoration-border decoration-2 underline-offset-4 hover:decoration-accent"
+        >
+          {session.workoutName}
+        </button>
         <p className="text-sm text-text-muted">{formatDateLong(session.date)}</p>
       </div>
 

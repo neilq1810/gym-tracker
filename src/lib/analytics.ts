@@ -1,13 +1,19 @@
 import type { WorkoutSession } from '@/types'
-import { getDayProgram, jsDayIndexToWorkoutDay } from '@/data/schedule'
+import { DEFAULT_SCHEDULE, jsDayIndexToWorkoutDay } from '@/data/schedule'
 import { sessionVolume } from './calculations'
 
 function toDateOnly(d: Date): string {
   return d.toISOString().slice(0, 10)
 }
 
+/**
+ * Whether `date` is a rest day per the default 6-on/1-off cadence. Splits are
+ * freely swappable day to day, but the streak still expects *some* training
+ * on non-rest days — so this checks the cadence, not which specific split
+ * the default schedule suggests.
+ */
 function isScheduledRestDay(date: Date): boolean {
-  return getDayProgram(jsDayIndexToWorkoutDay(date.getDay())).category === 'rest'
+  return DEFAULT_SCHEDULE[jsDayIndexToWorkoutDay(date.getDay())] === null
 }
 
 function hasCompletedSessionOn(sessions: WorkoutSession[], dateStr: string): boolean {

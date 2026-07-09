@@ -19,6 +19,9 @@ export type WorkoutDay =
 
 export type MuscleCategory = 'push' | 'pull' | 'legs' | 'rest'
 
+/** One of the 6 fixed PPL splits. Independent of any calendar day. */
+export type SplitId = 'push-a' | 'pull-a' | 'legs-a' | 'push-b' | 'pull-b' | 'legs-b'
+
 /** Which tempo cue set an exercise should show on its card. */
 export type TempoGuideKey =
   | 'compound'
@@ -49,10 +52,10 @@ export interface ProgramExercise {
   repRangeMax: number
 }
 
-export interface DayProgram {
-  day: WorkoutDay
-  /** Human label, e.g. "Push A". Null on rest days. */
-  workoutName: string | null
+/** A fixed workout routine (e.g. "Push A"), independent of which day it's performed on. */
+export interface SplitProgram {
+  id: SplitId
+  name: string
   category: MuscleCategory
   exercises: ProgramExercise[]
 }
@@ -80,8 +83,9 @@ export type WorkoutStatus = 'in-progress' | 'completed'
 
 export interface WorkoutSession {
   id: string
-  day: WorkoutDay
+  splitId: SplitId
   workoutName: string
+  category: MuscleCategory
   /** ISO date (yyyy-mm-dd) the workout belongs to. */
   date: string
   startedAt: number

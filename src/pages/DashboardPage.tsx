@@ -1,15 +1,17 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { TodayWorkoutCard } from '@/components/dashboard/TodayWorkoutCard'
 import { WeekScheduleStrip } from '@/components/dashboard/WeekScheduleStrip'
 import { QuickStats } from '@/components/dashboard/QuickStats'
 import { ActiveWorkoutBanner } from '@/components/dashboard/ActiveWorkoutBanner'
+import { SplitPickerModal } from '@/components/dashboard/SplitPickerModal'
 import { Button } from '@/components/ui/Button'
 import { CopyIcon } from '@/components/ui/Icons'
-import { getTodayProgram, jsDayIndexToWorkoutDay } from '@/data/schedule'
+import { DEFAULT_SCHEDULE, getSplitById, getTodaysSuggestedSplit, jsDayIndexToWorkoutDay } from '@/data/schedule'
 import { useAppStore } from '@/store/useAppStore'
 import { currentStreak, totalWorkoutsCompleted, weeklyVolume } from '@/lib/analytics'
+import type { SplitId } from '@/types'
 
 export function DashboardPage() {
   const navigate = useNavigate()
@@ -20,22 +22,30 @@ export function DashboardPage() {
   const duplicateWorkout = useAppStore((s) => s.duplicateWorkout)
 
   const today = useMemo(() => new Date(), [])
-  const program = useMemo(() => getTodayProgram(today), [today])
   const todayWorkoutDay = jsDayIndexToWorkoutDay(today.getDay())
+  const isRestDay = DEFAULT_SCHEDULE[todayWorkoutDay] === null
+  const suggestedSplit = useMemo(() => getTodaysSuggestedSplit(today), [today])
+
+  const [selectedSplitId, setSelectedSplitId] = useState<SplitId | null>(suggestedSplit?.id ?? null)
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const selectedSplit = selectedSplitId ? getSplitById(selectedSplitId) : null
 
   const streak = useMemo(() => currentStreak(sessions, today), [sessions, today])
   const weekVolume = useMemo(() => weeklyVolume(sessions, today), [sessions, today])
   const totalWorkouts = useMemo(() => totalWorkoutsCompleted(sessions), [sessions])
 
   const lastMatchingSession = useMemo(() => {
-    if (!program.workoutName) return null
-    return sessions
-      .filter((s) => s.status === 'completed' && s.workoutName === program.workoutName)
-      .sort((a, b) => b.date.localeCompare(a.date))[0] ?? null
-  }, [sessions, program.workoutName])
+    if (!selectedSplit) return null
+    return (
+      sessions
+        .filter((s) => s.status === 'completed' && s.splitId === selectedSplit.id)
+        .sort((a, b) => b.date.localeCompare(a.date))[0] ?? null
+    )
+  }, [sessions, selectedSplit])
 
   function handleStart() {
-    startWorkout(program)
+    if (!selectedSplit) return
+    startWorkout(selectedSplit)
     navigate('/workout')
   }
 
@@ -43,6 +53,11 @@ export function DashboardPage() {
     if (!lastMatchingSession) return
     duplicateWorkout(lastMatchingSession)
     navigate('/workout')
+  }
+
+  function handlePickSplit(splitId: SplitId) {
+    setSelectedSplitId(splitId)
+    setPickerOpen(false)
   }
 
   return (
@@ -64,14 +79,27 @@ export function DashboardPage() {
 
       <QuickStats streak={streak} weekVolume={weekVolume} totalWorkouts={totalWorkouts} unit={settings.unit} />
 
-      <TodayWorkoutCard program={program} onStart={handleStart} disabled={!!activeSession} />
+      <TodayWorkoutCard
+        split={selectedSplit}
+        isRestDay={isRestDay}
+        onStart={handleStart}
+        onChooseDifferent={() => setPickerOpen(true)}
+        disabled={!!activeSession}
+      />
 
-      {!activeSession && lastMatchingSession && program.category !== 'rest' && (
+      {!activeSession && lastMatchingSession && selectedSplit && (
         <Button variant="secondary" onClick={handleRepeat}>
           <CopyIcon className="h-4 w-4" />
-          Repeat last {program.workoutName}
+          Repeat last {selectedSplit.name}
         </Button>
       )}
+
+      <SplitPickerModal
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onPick={handlePickSplit}
+        suggestedSplitId={suggestedSplit?.id}
+      />
     </PageContainer>
   )
 }
