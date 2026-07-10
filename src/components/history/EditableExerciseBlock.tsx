@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button'
 import { SetRow } from '@/components/workout/SetRow'
 import { PlusIcon, TrophyIcon } from '@/components/ui/Icons'
 import { getExerciseById } from '@/data/exercises'
+import { insertSet } from '@/lib/sessionFactory'
 import { formatWeight } from '@/utils/format'
 import type { PersonalRecord, SetEntry, WorkoutExerciseLog } from '@/types'
 
@@ -17,6 +18,7 @@ interface EditableExerciseBlockProps {
 
 export function EditableExerciseBlock({ log, editable, pr, unit, onChange }: EditableExerciseBlockProps) {
   const exercise = getExerciseById(log.exerciseId)
+  const isDumbbell = exercise?.equipment === 'Dumbbell'
 
   function updateSet(setId: string, patch: Partial<SetEntry>) {
     onChange({ ...log, sets: log.sets.map((s) => (s.id === setId ? { ...s, ...patch } : s)) })
@@ -27,13 +29,7 @@ export function EditableExerciseBlock({ log, editable, pr, unit, onChange }: Edi
   }
 
   function addSet(isWarmup = false) {
-    onChange({
-      ...log,
-      sets: [
-        ...log.sets,
-        { id: crypto.randomUUID(), weight: 0, reps: 0, completed: true, notes: '', isWarmup },
-      ],
-    })
+    onChange({ ...log, sets: insertSet(log.sets, isWarmup, { completed: true }) })
   }
 
   return (
@@ -51,6 +47,10 @@ export function EditableExerciseBlock({ log, editable, pr, unit, onChange }: Edi
           </Badge>
         )}
       </div>
+
+      {editable && isDumbbell && (
+        <p className="mt-3 text-[11px] text-text-faint">Log the weight of one dumbbell, not the combined total.</p>
+      )}
 
       <div className="mt-3 space-y-1">
         {log.sets.map((set, i) => {
@@ -71,7 +71,7 @@ export function EditableExerciseBlock({ log, editable, pr, unit, onChange }: Edi
                 {set.isWarmup ? 'W' : workingIndex}
               </span>
               <span className={set.completed ? 'text-text' : 'text-text-faint line-through'}>
-                {set.weight} {unit} &times; {set.reps} reps
+                {set.weight} {unit}{isDumbbell && ' each'} &times; {set.reps} reps
               </span>
               {set.notes && <span className="truncate text-xs text-text-faint">"{set.notes}"</span>}
             </div>
