@@ -50,6 +50,7 @@ export function ExerciseCard({ log, sessionDate, sessionId, index, count }: Exer
 
   const exercise = getExerciseById(log.exerciseId)
   const tempo = exercise ? TEMPO_GUIDES[exercise.tempoGuide] : null
+  const isDumbbell = exercise?.equipment === 'Dumbbell'
 
   const previous = useMemo(
     () => findPreviousLog(sessions, log.exerciseId, sessionDate, sessionId),
@@ -179,9 +180,14 @@ export function ExerciseCard({ log, sessionDate, sessionId, index, count }: Exer
             <div className="mb-1 flex items-center gap-2 px-1 text-[10px] font-semibold uppercase tracking-wide text-text-faint">
               <span className="w-7">Set</span>
               <span className="w-20">Prev</span>
-              <span className="flex-1 text-center">{settings.unit}</span>
+              <span className="flex-1 text-center">{settings.unit}{isDumbbell && ' (each)'}</span>
               <span className="flex-1 text-center">Reps</span>
             </div>
+            {isDumbbell && (
+              <p className="mb-1.5 px-1 text-[11px] text-text-faint">
+                Log the weight of one dumbbell, not the combined total.
+              </p>
+            )}
             <div className="space-y-1">
               {log.sets.map((set, i) => {
                 const workingIndex = log.sets.slice(0, i + 1).filter((s) => !s.isWarmup).length
