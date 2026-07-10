@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button'
 import { SetRow } from '@/components/workout/SetRow'
 import { PlusIcon, TrophyIcon } from '@/components/ui/Icons'
 import { getExerciseById } from '@/data/exercises'
+import { insertSet } from '@/lib/sessionFactory'
 import { formatWeight } from '@/utils/format'
 import type { PersonalRecord, SetEntry, WorkoutExerciseLog } from '@/types'
 
@@ -27,13 +28,7 @@ export function EditableExerciseBlock({ log, editable, pr, unit, onChange }: Edi
   }
 
   function addSet(isWarmup = false) {
-    onChange({
-      ...log,
-      sets: [
-        ...log.sets,
-        { id: crypto.randomUUID(), weight: 0, reps: 0, completed: true, notes: '', isWarmup },
-      ],
-    })
+    onChange({ ...log, sets: insertSet(log.sets, isWarmup, { completed: true }) })
   }
 
   return (

@@ -18,6 +18,23 @@ export function createEmptySet(isWarmup = false): SetEntry {
   }
 }
 
+/**
+ * Adds a new set to a log's set list. Warm-ups are inserted right before the
+ * first working set (so they always sit above working sets, matching how
+ * a lifter actually orders a set in the gym); working sets are appended.
+ */
+export function insertSet(
+  sets: SetEntry[],
+  isWarmup: boolean,
+  overrides?: Partial<SetEntry>,
+): SetEntry[] {
+  const newSet = { ...createEmptySet(isWarmup), ...overrides }
+  if (!isWarmup) return [...sets, newSet]
+  const firstWorkingIndex = sets.findIndex((s) => !s.isWarmup)
+  const insertAt = firstWorkingIndex === -1 ? sets.length : firstWorkingIndex
+  return [...sets.slice(0, insertAt), newSet, ...sets.slice(insertAt)]
+}
+
 function createLogFromProgramExercise(
   exerciseId: string,
   orderIndex: number,

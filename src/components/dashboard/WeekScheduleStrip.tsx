@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { DEFAULT_SCHEDULE, getSplitById } from '@/data/schedule'
 import { CheckIcon } from '@/components/ui/Icons'
+import { toLocalDateString } from '@/utils/format'
 import type { WorkoutDay, WorkoutSession } from '@/types'
 
 const SHORT_LABEL: Record<WorkoutDay, string> = {
@@ -35,7 +36,7 @@ function currentWeekDates(reference: Date): Record<WorkoutDay, string> {
   DAY_DISPLAY_ORDER.forEach((day, i) => {
     const d = new Date(monday)
     d.setDate(d.getDate() + i)
-    result[day] = d.toISOString().slice(0, 10)
+    result[day] = toLocalDateString(d)
   })
   return result
 }

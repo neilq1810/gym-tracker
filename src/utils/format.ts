@@ -31,6 +31,27 @@ export function formatVolume(volume: number, unit: string): string {
   return `${Math.round(volume)} ${unit}`
 }
 
+/**
+ * Formats a Date as a local-calendar yyyy-mm-dd string. Deliberately not
+ * `date.toISOString().slice(0, 10)` — that converts to UTC first, which
+ * silently rolls the date forward or back a day for anyone not on UTC
+ * (e.g. a Friday-night workout logged after ~7pm US Eastern becomes
+ * "Saturday" in UTC). Always build date-only strings from local
+ * year/month/day components instead.
+ */
+export function toLocalDateString(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+/** Parses a yyyy-mm-dd string as local midnight (not UTC midnight). */
+export function parseLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
 export function todayIso(): string {
-  return new Date().toISOString().slice(0, 10)
+  return toLocalDateString(new Date())
 }

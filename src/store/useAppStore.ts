@@ -12,9 +12,9 @@ import { repository, DEFAULT_SETTINGS } from '@/lib/repository'
 import { generateId } from '@/lib/id'
 import {
   copyPreviousIntoLog,
-  createEmptySet,
   createSessionFromPrevious,
   createSessionFromSplit,
+  insertSet,
 } from '@/lib/sessionFactory'
 import { findPreviousLog } from '@/lib/calculations'
 import { todayIso } from '@/utils/format'
@@ -160,7 +160,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const updated: WorkoutSession = {
       ...activeSession,
       exercises: activeSession.exercises.map((log) =>
-        log.id !== exerciseLogId ? log : { ...log, sets: [...log.sets, createEmptySet(isWarmup)] },
+        log.id !== exerciseLogId ? log : { ...log, sets: insertSet(log.sets, isWarmup) },
       ),
     }
     set((state) => ({ activeSession: updated, sessions: upsertLocal(state.sessions, updated) }))
