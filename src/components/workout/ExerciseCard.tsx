@@ -182,6 +182,10 @@ export function ExerciseCard({ log, sessionDate, sessionId, index, count }: Exer
               <span className="w-20">Prev</span>
               <span className="flex-1 text-center">{settings.unit}{isDumbbell && ' (each)'}</span>
               <span className="flex-1 text-center">Reps</span>
+              {/* Spacers matching SetRow's trailing notes-toggle and complete-toggle buttons,
+                  so the two flex-1 labels above line up with their inputs, not the row's full width. */}
+              <span className="w-9" aria-hidden="true" />
+              <span className="w-11" aria-hidden="true" />
             </div>
             {isDumbbell && (
               <p className="mb-1.5 px-1 text-[11px] text-text-faint">
